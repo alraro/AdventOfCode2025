@@ -50,7 +50,7 @@ def process_all_lines(lines, function, algo_name, digits):
 
 def main():
 	acum = 0
-	input_file = "Day 3/test"
+	input_file = "Day3/test"
 	# input_file = "Day 2/test"
 	with open(input_file, "r") as file:
 		lines = list(file.readlines())

@@ -32,7 +32,7 @@ def get_wrong_ids_inrange(start, end):
 
 def main():
 	acum = 0
-	input_file = "Day 2/input"
+	input_file = "Day2/input"
 	# input_file = "Day 2/test"
 	with open(input_file, "r") as file:
 		lines = file.read()
