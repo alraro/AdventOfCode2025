@@ -32,8 +32,13 @@ def main():
 	i = 0
 	while i < len(tiles) - 1:
 		curr = tiles[i]
-		area = curr.get_area(other)
-		biggest = max(biggest, area)
+		j = i + 1
+		while j < len(tiles):
+			other = tiles[j]
+			area = curr.get_area(other)
+			biggest = max(biggest, area)
+			j += 1
+		i += 1
 	print("Biggest area:", biggest)
 if __name__ == "__main__":
 	main()
