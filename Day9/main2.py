@@ -12,6 +12,31 @@ class Tile:
 	def get_area(self, other):
 		return (abs(self.x - other.x) + 1) * (abs(self.y - other.y) + 1)
 
+class Edge:
+	def __init__(self, start: Tile, end: Tile):
+		self.start = start
+		self.end = end
+  
+	def is_in_edge(self, tile: Tile):
+		if self.start.x == self.end.x:
+			if tile.x != self.start.x:
+				return False
+			return min(self.start.y, self.end.y) <= tile.y <= max(self.start.y, self.end.y)
+		else:
+			if tile.y != self.start.y:
+				return False
+			return min(self.start.x, self.end.x) <= tile.x <= max(self.start.x, self.end.x)
+
+	def is_cutting_edge(self, other):
+		if not isinstance(other, Edge):
+			return False
+		if self.start.x == self.end.x and other.start.y == other.end.y:
+			return (min(other.start.x, other.end.x) <= self.start.x <= max(other.start.x, other.end.x) and
+					min(self.start.y, self.end.y) <= other.start.y <= max(self.start.y, self.end.y))
+		if self.start.y == self.end.y and other.start.x == other.end.x:
+			return (min(other.start.y, other.end.y) <= self.start.y <= max(other.start.y, other.end.y) and
+					min(self.start.x, self.end.x) <= other.start.x <= max(self.start.x, self.end.x))
+		return False
 
 class Board:
 	x_min = int(1e9)
@@ -19,6 +44,7 @@ class Board:
 	y_min = int(1e9)
 	y_max = int(-1e9)
 	tiles = []
+	edges = []
 	count = 0
 
 	def __init__(self):
@@ -31,6 +57,8 @@ class Board:
 		self.x_min = min(self.x_min, tile.x)
 		self.y_max = max(self.y_max, tile.y)
 		self.y_min = min(self.y_min, tile.y)
+		if self.count > 1:
+			self.edges.append(Edge(self.get_tile(self.count - 2), self.get_tile(self.count - 1)))
 
 	def get_tile(self, index):
 		return self.tiles[index % self.count]
@@ -53,11 +81,31 @@ class Board:
 	def __repr__(self):
 		return str(self)
 
+	def is_contained(self, x, y):
+		inside = False
+		for k in range(self.count):
+			p1 = self.get_tile(k)
+			p2 = self.get_tile(k + 1)
+
+			if (p1.y > y) != (p2.y > y):
+				intersect_x = (p2.x - p1.x) * (y - p1.y) / (p2.y - p1.y) + p1.x
+				if x < intersect_x:
+					inside = not inside
+
+		return inside
+
 	def is_inside(self, corner1, corner2):
-		for i in range(1, self.count):
-			prev = self.get_tile(i - 1)
-			curr = self.get_tile(i)
-			return True
+		x_min = min(corner1.x, corner2.x)
+		x_max = max(corner1.x, corner2.x)
+		y_min = min(corner1.y, corner2.y)
+		y_max = max(corner1.y, corner2.y)
+		for edge in self.edges:
+			if edge.is_cutting_edge(Edge(Tile(x_min, y_min), Tile(x_max, y_min))) or \
+			   edge.is_cutting_edge(Edge(Tile(x_min, y_max), Tile(x_max, y_max))) or \
+			   edge.is_cutting_edge(Edge(Tile(x_min, y_min), Tile(x_min, y_max))) or \
+			   edge.is_cutting_edge(Edge(Tile(x_max, y_min), Tile(x_max, y_max))):
+				return False
+		return self.is_contained(corner1, corner2)
 
 	def get_biggest_area(self):
 		biggest = 0
@@ -78,7 +126,7 @@ class Board:
  
 def main():
 	board = Board()
-	input_file = "Day9/test"
+	input_file = "Day9/input"
 	with open(input_file, "r") as file:
 		lines = list(file.readlines())
 	for line in lines:
