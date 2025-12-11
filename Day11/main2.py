@@ -14,7 +14,10 @@ class Graph:
 		if visited is None:
 			visited = {node}
 		if node == destination:
-			return 1
+			if "fft" in visited and "dac" in visited:
+				return 1
+			else:
+				return 0
 		ways = 0
 		neighbors = self.get_neighbors(node)
 		for neighbor in neighbors:
@@ -34,7 +37,7 @@ class Graph:
 		return self.__str__()
 	
 def main():
-	input_file = "Day11/input"
+	input_file = "Day11/test2"
 	with open(input_file, "r") as file:
 		lines = list(file.readlines())
 	graph = Graph()
@@ -46,7 +49,7 @@ def main():
 		for conn in connections:
 			graph.add_edge(node, conn)
 	print(graph)
-	connections = graph.get_connections("you", "out")
+	connections = graph.get_connections("svr", "out")
 	print("Total connections:", connections)
  
 
